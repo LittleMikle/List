@@ -7,15 +7,26 @@ import (
 	"net/http"
 )
 
+// @Summary SignUp
+// @Tags auth
+// @Description create account
+// @ID create-account
+// @Accept  json
+// @Produce  json
+// @Param input body todo.User true "account info"
+// @Success 200 {integer} integer 1
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /auth/sign-up [post]
 func (h *Handler) signUp(c *gin.Context) {
 	var input todo.User
 	err := c.BindJSON(&input)
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
-		//log.Error().Msgf("failed with signUp handler: %w", err)
 		return
 	}
-	id, err := h.services.Autorization.CreateUser(input)
+	id, err := h.services.Authorization.CreateUser(input)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -30,6 +41,18 @@ type signInInput struct {
 	Password string `json:"password" binding:"required"`
 }
 
+// @Summary SignIn
+// @Tags auth
+// @Description login
+// @ID login
+// @Accept  json
+// @Produce  json
+// @Param input body signInInput true "credentials"
+// @Success 200 {string} string "token"
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /auth/sign-in [post]
 func (h *Handler) signIn(c *gin.Context) {
 	var input signInInput
 
@@ -37,9 +60,8 @@ func (h *Handler) signIn(c *gin.Context) {
 	if err != nil {
 		log.Error().Msgf("failed with signIn JSON input: %w", err)
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
-		//log.Error().Msgf("failed with signIn handler: %w", err)
 	}
-	token, err := h.services.Autorization.GenerateToken(input.Username, input.Password)
+	token, err := h.services.Authorization.GenerateToken(input.Username, input.Password)
 	if err != nil {
 		log.Error().Msgf("failed with signIn generating token: %w", err)
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
