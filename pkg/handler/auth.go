@@ -23,12 +23,12 @@ func (h *Handler) signUp(c *gin.Context) {
 	var input todo.User
 	err := c.BindJSON(&input)
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
 	id, err := h.services.Authorization.CreateUser(input)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, http.StatusInternalServerError, "service failure")
 		return
 	}
 	c.JSON(http.StatusOK, map[string]interface{}{
@@ -58,12 +58,12 @@ func (h *Handler) signIn(c *gin.Context) {
 
 	err := c.BindJSON(&input)
 	if err != nil {
-		log.Error().Msgf("failed with signIn JSON input: %w", err)
+		log.Error().Err(err).Msg("failed with signIn JSON input:")
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 	}
 	token, err := h.services.Authorization.GenerateToken(input.Username, input.Password)
 	if err != nil {
-		log.Error().Msgf("failed with signIn generating token: %w", err)
+		log.Error().Err(err).Msg("failed with signIn generating token:")
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
